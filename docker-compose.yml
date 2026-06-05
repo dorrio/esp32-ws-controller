@@ -1,0 +1,30 @@
+# Compose opcional para la opción "Docker Compose" de Dokploy.
+#
+# Si usas el tipo de servicio "Application" en Dokploy NO necesitas este archivo:
+# Dokploy detecta el Dockerfile, lo construye y tú solo indicas el puerto (8080)
+# y el dominio en la UI. Traefik gestiona el WebSocket automáticamente.
+#
+# Para la opción "Compose": Dokploy inyecta las labels de Traefik a partir de los
+# dominios que configures en la UI; basta con exponer el puerto del contenedor.
+services:
+  esp32ws:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PORT=8080
+      # Token que protege la API /api/* (Bearer). Obligatorio para usar la API.
+      # En Dokploy define este valor en la UI (no lo dejes en el repo).
+      - CONTROL_TOKEN=${CONTROL_TOKEN:?define CONTROL_TOKEN}
+      # Clave que debe enviar la placa en /ws?key=... (recomendado).
+      - DEVICE_KEY=${DEVICE_KEY:?define DEVICE_KEY}
+    expose:
+      - "8080"
+    restart: unless-stopped
+    healthcheck:
+      # distroless no trae shell ni curl: usamos el propio binario como sonda.
+      test: ["CMD", "/app/esp32ws", "-healthcheck"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

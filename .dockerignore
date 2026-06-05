@@ -1,0 +1,13 @@
+# Binarios y artefactos locales
+/esp32ws
+/fake-esp32
+*.exe
+*.log
+
+# Git y metadatos
+.git
+.gitignore
+.claude
+
+# Docs (no necesarias para compilar)
+README.md

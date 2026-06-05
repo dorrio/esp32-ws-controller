@@ -1,0 +1,7 @@
+# Binarios compilados
+/esp32ws
+/fake-esp32
+*.exe
+
+# Logs
+*.log
