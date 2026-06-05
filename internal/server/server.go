@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -46,14 +47,17 @@ type Config struct {
 	// DeviceKey protege el WebSocket /ws. Si está vacía, /ws acepta cualquier
 	// placa (solo se recomienda en red local de confianza).
 	DeviceKey string
+	// PublicURL es la URL pública del servicio. Si está vacía, se detecta de las
+	// cabeceras X-Forwarded-* que añade el proxy inverso (Traefik/Dokploy).
+	PublicURL string
 }
 
-// ConfigFromEnv lee la configuración de las variables de entorno CONTROL_TOKEN
-// y DEVICE_KEY.
+// ConfigFromEnv lee la configuración de las variables de entorno.
 func ConfigFromEnv() Config {
 	return Config{
 		ControlToken: os.Getenv("CONTROL_TOKEN"),
 		DeviceKey:    os.Getenv("DEVICE_KEY"),
+		PublicURL:    os.Getenv("PUBLIC_URL"),
 	}
 }
 
@@ -62,6 +66,8 @@ type Server struct {
 	hub          *hub.Hub
 	controlToken string
 	deviceKey    string
+	publicURL    string
+	publicOnce   sync.Once
 }
 
 // New crea un Server tomando la configuración del entorno.
@@ -81,6 +87,7 @@ func NewWithConfig(cfg Config) *Server {
 		hub:          hub.New(),
 		controlToken: cfg.ControlToken,
 		deviceKey:    cfg.DeviceKey,
+		publicURL:    cfg.PublicURL,
 	}
 }
 
@@ -103,7 +110,7 @@ func (s *Server) Routes() http.Handler {
 		_, _ = w.Write([]byte("ok"))
 	})
 
-	return logRequests(mux)
+	return s.logRequests(mux)
 }
 
 // ---------------------------------------------------------------------------

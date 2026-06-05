@@ -48,9 +48,12 @@ func main() {
 
 	// Arrancamos el servidor en segundo plano.
 	go func() {
-		log.Printf("servidor escuchando en %s", *addr)
-		log.Printf("  WebSocket (ESP32):  ws://localhost%s/ws", *addr)
-		log.Printf("  API de control:     http://localhost%s/api/...", *addr)
+		log.Printf("servidor escuchando en %s (dirección interna del contenedor)", *addr)
+		if pu := os.Getenv("PUBLIC_URL"); pu != "" {
+			log.Printf("URL pública: %s", pu)
+		} else {
+			log.Printf("URL pública: se detectará en la primera petición (vía X-Forwarded-Host)")
+		}
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("error del servidor: %v", err)
 		}

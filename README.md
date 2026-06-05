@@ -80,6 +80,7 @@ El servidor está pensado para exponerse a Internet (Dokploy), así que aplica:
 |---------------------|---------|------------------------|
 | `CONTROL_TOKEN`     | API `/api/*` (cabecera `Authorization: Bearer <token>`) | La API queda **deshabilitada** (responde 503) |
 | `DEVICE_KEY`        | WebSocket `/ws` (la placa manda `?key=<clave>`)          | `/ws` acepta cualquier placa (solo red local) |
+| `PUBLIC_URL` (opc.) | Solo informativa: se muestra en logs                    | Se detecta de `X-Forwarded-Host` en la 1ª petición |
 
 Además, sin necesidad de configuración:
 
